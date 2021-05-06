@@ -1,5 +1,5 @@
 exports.allAccess = (req, res) => {
-    console.log('all access');
+    console.log('all access NEW');
   res.status(200).send("Publichicid Content.");
 };
 

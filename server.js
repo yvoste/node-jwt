@@ -3,27 +3,26 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
-
+/*
 var corsOptions = {
   origin: "http://localhost:8081"
 };
 
 app.use(cors(corsOptions));
-
-/*
+*/
 app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
-    );
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-    );
-    next();
-  });
-  */
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  next();
+});
+
 // parse requests of content-type - application/json
 app.use(express.json());
 
@@ -41,22 +40,18 @@ db.sequelize.sync();
 //   initial();
 // });
 
-// simple route
-/*
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
-});
-*/
+
 // routes
 require('./routes/auth.routes')(app);
 require('./routes/user.routes')(app);
+require('./routes/tutorial.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
-
+// this role name (ROLE_ADMIN, ROLE_MODERATOR, ROLE_USER) it use in Login.vue 
 function initial() {
   Role.create({
     id: 1,
