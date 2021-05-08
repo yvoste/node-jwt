@@ -3,18 +3,19 @@ const Tutorial = db.tutorials;
 const Comment = db.comments;
 const Tag = db.tag;
 const Op = db.Sequelize.Op;
+//const nbTotal = '';
 const getPagination = (page, size) => {
   const limit = size ? +size : 3;
   const offset = page ? page * limit : 0;
 
   return { limit, offset };
 };
-const getPagingData = (data, page, limit) => {
+const getPagingData = (data, page, limit, nbTotal) => {
   const { count: totalItems, rows: tutorials } = data;
   const currentPage = page ? +page : 0;
   const totalPages = Math.ceil(totalItems / limit);
 
-  return { totalItems, tutorials, totalPages, currentPage };
+  return { nbTotal, tutorials, totalPages, currentPage };
 };
 
 
@@ -77,7 +78,7 @@ exports.createComment = (req, res) => {
 	});
 };
 
-// Create abd save new Tag
+// Create and save new Tag
 exports.createTag = (req, res) => {
 	if (!req.body.name) {
     res.status(400).send({
@@ -102,30 +103,6 @@ exports.createTag = (req, res) => {
 	});
 };
 
-
-// Retrieve all Tutorials from the database.
-/*
-exports.findAll = (req, res) => {
-  Tutorial.findAll({ 
-	include: [
-		{
-			model: Comment,
-			as: "comments",
-			attributes: ["id", "name"]
-		}
-	]})
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving tutorials."
-      });
-    });
-};
-
-*/
 // Retrieve all Tutorials from the database with condition Title.
 
   exports.findByTitle = (req, res) => {
@@ -160,32 +137,33 @@ exports.findAll = (req, res) => {
   
 
   // Retrieve all Tutorials from the database with Pagination.
-
   exports.findAll = (req, res) => {
     const {page, size} = req.query;
-    const {limit, offset} = getPagination(page, size);    
-    Tutorial.findAndCountAll({
-      //attribute: ['id', 'name', [sequelize.fn("COUNT", sequelize.col('tutorials.id')), "count"]],
-      include: [
-        {
-          model: Comment,
-          as: "comments",
-          attributes: ['id', 'name']
-        }
-      ],
-      where: null, //{published: 1}
-      limit, 
-      offset,
-      })
-      .then(data => {
-        console.log(data);
-        const response = getPagingData(data, page, limit);
-        res.send(response);
-      })
-      .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving tutorials."
+    const {limit, offset} = getPagination(page, size);
+
+    Tutorial.count().then(nbTotal => {
+      Tutorial.findAndCountAll({
+        include: [
+          {
+            model: Comment,
+            as: "comments",
+            attributes: ['id', 'name']
+          }
+        ],
+        where: null, //{published: 1}
+        limit, 
+        offset,
+        })
+        .then(data => {
+          console.log(data);
+          const response = getPagingData(data, page, limit, nbTotal);
+          res.send(response);
+        })
+        .catch(err => {
+          res.status(500).send({
+            message:
+              err.message || "Some error occurred while retrieving tutorials."
+          });
         });
       });
   };
